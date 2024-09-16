@@ -4,6 +4,8 @@
 #SBATCH -n 1
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=h.williams.22@abdn.ac.uk
+#SBATCH --output=/uoa/home/r02hw22/sharedscratch/Methylation_Analyses/Methylation_Analyses_Anemones/slurm_outputs
+#SBATCH --error=/uoa/home/r02hw22/sharedscratch/Methylation_Analyses/Methylation_Analyses_Anemones/slurm_errors/%x_%j.err
 
 #SBATCH --time=1-00:00:00
 

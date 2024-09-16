@@ -6,6 +6,8 @@
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=h.williams.22@abdn.ac.uk
 #SBATCH --time=1-00:00:00
+#SBATCH --output=/uoa/home/r02hw22/sharedscratch/Methylation_Analyses/Methylation_Analyses_Anemones/slurm_outputs
+#SBATCH --error=/uoa/home/r02hw22/sharedscratch/Methylation_Analyses/Methylation_Analyses_Anemones/slurm_errors/%x_%j.err
 
 # sbatch /uoa/home/r02hw22/Equina_Methylation_Analysis/Scripts/run_loop_bismark2bedgraph_chh.sh
 

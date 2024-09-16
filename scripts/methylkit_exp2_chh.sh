@@ -5,6 +5,8 @@
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=h.williams.22@abdn.ac.uk	
 #SBATCH --time=1-00:00:00
+#SBATCH --output=/uoa/home/r02hw22/sharedscratch/Methylation_Analyses/Methylation_Analyses_Anemones/slurm_outputs
+#SBATCH --error=/uoa/home/r02hw22/sharedscratch/Methylation_Analyses/Methylation_Analyses_Anemones/slurm_errors/%x_%j.err
 
 # Need to create this directory before using script
 setwd("/uoa/home/r02hw22/Equina_Methylation_Analysis/outputs")
@@ -98,7 +100,7 @@ heatmap(as.matrix(methMatrix), Colv = NA, scale="row", margins=c(10, 10))
 
 # !! Currently not working, states:
 # Error in (function (classes, fdef, mtable)  :
-# unable to find an inherited method for function ‘getMethylationStats’ for signature ‘"methylBaseDB"’
+# unable to find an inherited method for function ï¿½getMethylationStatsï¿½ for signature ï¿½"methylBaseDB"ï¿½
 
 # 5. Calculate Differential Methylation ----
 dmb_CHH = calculateDiffMeth(act_CHH_fu,
