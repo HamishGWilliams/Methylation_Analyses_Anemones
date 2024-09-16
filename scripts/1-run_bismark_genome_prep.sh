@@ -6,7 +6,7 @@
 #SBATCH --mail-user=r02hw22@abdn.ac.uk
 #SBATCH --time=1-00:00:00
 
-# sbatch /uoa/home/r02hw22/Equina_Methylation_Analysis/Scripts/run_bismark_genome_prep.sh
+# sbatch /uoa/home/r02hw22/Equina_Methylation_Analysis/Scripts/1-run_bismark_genome_prep.sh
 
 module load  bowtie2/2.4.2
 module load  bismark/0.23.0

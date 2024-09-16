@@ -47,3 +47,13 @@ po/*~
 
 # RStudio Connect folder
 rsconnect/
+
+# Ignore Large files
+/path/to/your/data/
+*.bam
+*.fastq
+*.fastq.gz
+*.bigdata
+*.gz
+*_pe.deduplicated.txt
+*_cov_reads
