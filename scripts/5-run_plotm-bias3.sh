@@ -11,7 +11,7 @@
 
 # sbatch /uoa/home/r02hw22/Equina_Methylation_Analysis/Scripts/run_plotm-bias3.sh
 
-cd /uoa/home/r02hw22/Equina_Methylation_Analysis/Data/Trimmed/Sample_3-3_D
+cd /uoa/home/r02hw22/Equina_Methylation_Analysis/Data2/Trimmed/Sample_3-3_D
 
 awk '{f="file" NR; print $0 > f}' RS='================'  *.M-bias.txt
 #creates 7 files, first is not needed. others need only lines 2-152

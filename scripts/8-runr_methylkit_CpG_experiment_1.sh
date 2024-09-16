@@ -11,7 +11,7 @@
 #Rscript /uoa/home/r02hw22/Equina_Methylation_Analysis/Scripts/runr_methylkit_CpG_experiment_1.sh
 �
 # Need to create this directory before using script
-setwd("/uoa/home/r02hw22/Equina_Methylation_Analysis/outputs")
+setwd("/uoa/home/r02hw22/sharedscratch/Methylation_Analyses/Methylation_Analyses_Anemones/results")
 
 # Load in required packages
 library(methylKit)
@@ -122,12 +122,14 @@ dmb_CpG = calculateDiffMeth(act_CpG_fu,
 # Doing this solved this issue, and a previous one. Also improved the images with addition of colour                       
                            
 # Scatter plot of differential methylation
+## Adjust the difference value to change the percentage of the difference
 diffMethData <- getMethylDiff(dmb_CpG, difference=5, qvalue=0.1)
 plot(diffMethData, xlab="Methylation Difference (%)", ylab="Adjusted P-Value", main="Differential Methylation Scatterplot")
 
 # 4. Extract Methylation Difference Results ----
 act_diff_CpG = getMethylDiff(dmb_CpG, difference = 5, qvalue=0.99, type="all")
-#having diff = 5 reduces size of object which allows us to handle it, otherwise the system always falls over
+## having diff = 5 reduces size of object which allows us to handle it, otherwise the system always falls over
+## Adjust the difference value to change the percentage of the difference
 
 save(act_diff_CpG, file = "Actinia_exp1_DMBs_d5_CpG_experiment_1.RData")
 
@@ -178,8 +180,6 @@ act_diff_CpG_df_ann$chrom_num = as.numeric(sapply(strsplit(as.character(act_diff
 # This probably won't work since we dont have chromosome data: ff_CpG_df_ann$seqnames), "_"), "[[",3))
 # Error in FUN(X[[i]], ...) : subscript out of bounds
 
-
-
 act_diff_CpG_df_ann$p_fdr = p.adjust(act_diff_CpG_df_ann$pvalue, method = "fdr")
 act_diff_CpG_df_ann2$p_fdr = p.adjust(act_diff_CpG_df_ann2$pvalue, method = "fdr")
 overlap_data$p_fdr <- p.adjust(overlap_data$pvalue, method = "fdr")
@@ -202,13 +202,18 @@ write.table(overlap_DMBs_CpG_p01, "Exp1 overlap_DMBs in CpG context.txt", sep="\
 write.table(DMBs2_CpG_p01, "Exp1 DMBs2 in CpG context.txt", sep="\t", row.names=FALSE)
 # There isn't any data here, something in the steps before didnt work, which is evident
 
+
+# 9. Draw Manhattan plots
+## Doesnt work for this data currently, need to work out a way to make the WHPX... groupings into arbitrary chromosome numbers currently.
+
+'
 png("act_diff_CpG_manhattan_experiment_1.png")
 manhattan(act_diff_CpG_df_ann,
                            chr="chrom_num",
                            bp="start",
                            snp="Target",
                            p="pvalue",
-                           col=c("dodgerblue","coral" ), 
+                           col=c("dodgerblue","coral" ),
                            suggestiveline = -log10(1e-05),
                            genomewideline = -log10(5e-08),,
                            annotateTop = TRUE,
@@ -227,3 +232,4 @@ manhattan(act_diff_CpG_df_ann, p = "meth.diff",
                            suggestiveline = FALSE,
                            main = "Manhattan plot of methylation % differences CpG context")
 dev.off()
+'
