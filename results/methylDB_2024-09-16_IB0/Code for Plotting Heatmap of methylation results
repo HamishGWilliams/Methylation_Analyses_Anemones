@@ -1,0 +1,44 @@
+###########################################################
+## Differentially Methylated Sites Heatmap
+###########################################################
+
+# MUST USE  r/4.1.3 TO LOAD IN "GenomeInfoDb" package correctly!!!!
+
+# Need to create this directory before using script
+setwd("/uoa/home/r02hw22/sharedscratch/Methylation_Analyses/Methylation_Analyses_Anemones/results")
+
+library(methylKit)
+library(graphics)
+library(GenomicRanges)
+library(IRanges)
+library(mixtools)
+library(data.table)
+
+# Metadata for all samples
+info=read.table("../../Methyl_sample_groups.txt.csv")
+
+# For heatmap plotting purpose
+# get methylation percentage for all CpG sites
+DMCs.max=regionCounts(meth.MAX, regions = as(myDiff0p.MAX, "GRanges"))
+perc.DMCs.max=percMethylation(DMCs.max)
+
+# heatmap based on DMCs
+library(pheatmap)
+sample.max=info[grep("max",info$libraryname),]
+sampleinfo.max=data.frame(group=sample.max$group)
+rownames(sampleinfo.max)=colnames(perc.DMCs.max)
+ann_colors=list(group=c(Max_T="red", Max_C="grey"))
+p.heatmap.max=pheatmap(perc.DMCs.max,
+                       cluster_rows=TRUE,
+                       show_rownames=FALSE,
+                       show_colnames = TRUE,
+                       cluster_cols=TRUE,
+                       border_color = NA,
+                       scale = "row",
+                       clustering_distance_rows = "euclidean",
+                       clustering_distance_cols = "euclidean",
+                       clustering_method = "complete",
+                       annotation_col = sampleinfo.max,
+                       annotation_colors = ann_colors,
+                       annotation_names_col = F)
+p.heatmap.max

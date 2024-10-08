@@ -61,7 +61,6 @@ act_CpG_f = filterByCoverage(act_CpG, hi.count = 30, suffix = "CpG_f")
 # Unite the 
 act_CpG_fu = methylKit::unite(act_CpG_f, destrand=FALSE, min.per.group = 3L, suffix = "CpG_fu3")
 
-
 png("cluster_plot_act_CpG_experiment_2.png")
 clusterSamples(act_CpG_fu,
                         filterByQuantile = F,

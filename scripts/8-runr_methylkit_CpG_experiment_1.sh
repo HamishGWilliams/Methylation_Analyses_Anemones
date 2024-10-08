@@ -20,14 +20,14 @@ library(GenomicRanges)
 library(qqman)
 
 # Input list of files for each sample to use:
-file.list = list("../Data/Trimmed/Sample_3-3_D/meth_CpG_cov_reads",
-		"../Data/Trimmed/Sample_9-9_D/meth_CpG_cov_reads",
-		"../Data/Trimmed/Sample_13-13_D/meth_CpG_cov_reads",
-		"../Data/Trimmed/Sample_15-15_D/meth_CpG_cov_reads",
-		"../Data/Trimmed/Sample_16-16_D/meth_CpG_cov_reads",
-		"../Data/Trimmed/Sample_17-17_D/meth_CpG_cov_reads",
-		"../Data/Trimmed/Sample_22-22_D/meth_CpG_cov_reads",
-		"../Data/Trimmed/Sample_27-27_D/meth_CpG_cov_reads")
+file.list = list("../../Data/Trimmed/Sample_3-3_D/meth_CpG_cov_reads",
+		"../../Data/Trimmed/Sample_9-9_D/meth_CpG_cov_reads",
+		"../../Data/Trimmed/Sample_13-13_D/meth_CpG_cov_reads",
+		"../../Data/Trimmed/Sample_15-15_D/meth_CpG_cov_reads",
+		"../../Data/Trimmed/Sample_16-16_D/meth_CpG_cov_reads",
+		"../../Data/Trimmed/Sample_17-17_D/meth_CpG_cov_reads",
+		"../../Data/Trimmed/Sample_22-22_D/meth_CpG_cov_reads",
+		"../../Data/Trimmed/Sample_27-27_D/meth_CpG_cov_reads")
 
 
 # Write methRead() function with selected options for Experimental Design                  
@@ -126,6 +126,10 @@ dmb_CpG = calculateDiffMeth(act_CpG_fu,
 diffMethData <- getMethylDiff(dmb_CpG, difference=5, qvalue=0.1)
 plot(diffMethData, xlab="Methylation Difference (%)", ylab="Adjusted P-Value", main="Differential Methylation Scatterplot")
 
+# Error in as.double(y) :
+  # cannot coerce type 'S4' to vector of type 'double'
+
+
 # 4. Extract Methylation Difference Results ----
 act_diff_CpG = getMethylDiff(dmb_CpG, difference = 5, qvalue=0.99, type="all")
 ## having diff = 5 reduces size of object which allows us to handle it, otherwise the system always falls over
@@ -142,6 +146,9 @@ diffMethPerChr(act_diff_CpG,
                keep.empty.chrom = T)
 dev.off()
 
+# Warning message:
+# In eval(quote(list(...)), env) : NAs introduced by coercion
+
 
 # Does this work? do we have chromosone position data? I thought we didnt?
 
@@ -154,7 +161,7 @@ act_diff_CpG_gr =  as(act_diff_CpG_data,"GRanges")
 save(act_diff_CpG_gr, file = "act_diff_CpG_gr.RData")
 
 # 7. Overlap Granges positions with Genome annotated positions ----
-genome = read_gff3("../Data/A_Equina.gff3")
+genome = read_gff3("../../Data/A_Equina.gff3")
 
 act_diff_CpG_gr_ann = join_overlap_left_directed(act_diff_CpG_gr, genome)
 
