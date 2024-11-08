@@ -34,6 +34,22 @@ file.list = list("../../Data/Trimmed/Sample_3-3_D/meth_CpG_cov_reads",
 		"../../Data/Trimmed/Sample_22-22_D/meth_CpG_cov_reads",
 		"../../Data/Trimmed/Sample_27-27_D/meth_CpG_cov_reads")
 
+		# 21/10/24 - had a look back through the 2 different data directories which were generated:
+		  # Data/ has aligned the data to the WHPX names
+		  # Data2/ has aligned the data to the WHPX names
+		    # Was there a reason why I used the first directory over the second? I can't rememeber at this point why I specifically
+		    # did this, but this is useful to me now at least, I'm going to repeat the first stage of the analyses
+		    # using the 2nd directory and see if anything changes...
+
+		    file.list = list("../../Data2/Trimmed/Sample_3-3_D/meth_CpG_cov_reads",
+		"../../Data2/Trimmed/Sample_9-9_D/meth_CpG_cov_reads",
+		"../../Data2/Trimmed/Sample_13-13_D/meth_CpG_cov_reads",
+		"../../Data2/Trimmed/Sample_15-15_D/meth_CpG_cov_reads",
+		"../../Data2/Trimmed/Sample_16-16_D/meth_CpG_cov_reads",
+		"../../Data2/Trimmed/Sample_17-17_D/meth_CpG_cov_reads",
+		"../../Data2/Trimmed/Sample_22-22_D/meth_CpG_cov_reads",
+		"../../Data2/Trimmed/Sample_27-27_D/meth_CpG_cov_reads")
+
 
 # Write methRead() function with selected options for Experimental Design
 
@@ -58,8 +74,10 @@ dev.off()
 # 3. Filter the methylation results by a coverage threshold
 ## old code ## act_CpG_f = filterByCoverage(act_CpG, lo.count = 10, hi.count = 32, suffix = "CpG_f")
 ## Trying new code
-act_CpG_f = filterByCoverage(act_CpG, lo.count = 5, hi.perc = 99.9, suffix = "CpG_f")
+# act_CpG_f = filterByCoverage(act_CpG, lo.count = 5, hi.perc = 99.9, suffix = "CpG_f")
 				      # Change lo.count & hi.count based on the methylation & coverage plots
+## Final code:
+act_CpG_f = filterByCoverage(act_CpG, lo.count = 5, hi.count = 32, suffix = "CpG_f")
 
 ## Trying new code
 ## normalize read coverages between samples to avoid bias introduced by systematically more sequenced samples
@@ -67,6 +85,8 @@ act_CpG_f = normalizeCoverage(act_CpG_f, method="median")
 
 # 4. Unite the methylation results
 act_CpG_fu = methylKit::unite(act_CpG_f, destrand=FALSE, min.per.group = 3L, suffix = "CpG_fu3")
+# summary(getData(act_CpG_fu))
+# str(getData(act_CpG_fu))
 
 # Plot clustering of filtered data
 png("cluster_plot_act_CpG_experiment_1_new_code.png", width = 12, height = 8, units = "in", res = 300)
@@ -109,19 +129,13 @@ dev.off()
 # unable to find an inherited method for function �getMethylationStats� for signature �"methylBaseDB"�
 
 # 5. Calculate Differential Methylation ----
-  # WE NEED TO ADD IN COVARIATES FOR THE CLONES!!!!!!!!!!!
-covariates = data.frame(clone = c("5","15","9","15","2","5","9","2"))
-  # adding in this covariate to the analyses doesnt seem to change or account for anything...?
-
 dmb_CpG = calculateDiffMeth(act_CpG_fu,
-                            covariates = covariates,
                             overdispersion = "MN",
-                            #test = "F",
                             mc.cores = 32,
                             suffix = "CpGfu3odMNtestC")
 
 # Scatter plot of differential methylation
-# diffMethData <- getMethylDiff(dmb_CpG, qvalue=0.99)
+diffMethData <- getMethylDiff(dmb_CpG, qvalue=0.99, difference = 5, type = 'all')
 
 # png("scatter_plot_methylation_exp1_CpG.png")
 # plot(diffMethData, xlab="Methylation Difference (%)", ylab="Adjusted P-Value", main="Differential Methylation Scatterplot", width = 12, height = 8, units = "in", res = 300)
@@ -133,7 +147,7 @@ dmb_CpG = calculateDiffMeth(act_CpG_fu,
 
 # 6. Extract Methylation Difference Results ----
 act_diff_CpG_1 = getMethylDiff(dmb_CpG, diff = 1, qvalue=0.99, type="all")
-act_diff_CpG_2 = getMethylDiff(dmb_CpG, diff = 2, qvalue=0.99, type="all")
+act_diff_CpG_2 = getMethylDiff(dmb_CpG, diff = 2, qvalue=0.99, type="all") # Can run diff% = 2 before it falls over
 act_diff_CpG_5 = getMethylDiff(dmb_CpG, diff = 5, qvalue=0.99, type="all")
 act_diff_CpG_10 = getMethylDiff(dmb_CpG, diff = 10, qvalue=0.99, type="all")
 act_diff_CpG_15 = getMethylDiff(dmb_CpG, diff = 15, qvalue=0.99, type="all")
@@ -145,7 +159,7 @@ act_diff_CpG_25 = getMethylDiff(dmb_CpG, diff = 25, qvalue=0.99, type="all")
 act_diff_CpG = act_diff_CpG_2
 
 # !! CHECKPOINT !! save work to RData file
-save(act_diff_CpG, file = "Actinia_exp1_DMBs_d5_CpG_experiment_1.RData")
+save(DiffMeth_exp1_CpG, file = "Actinia_DMBs_d5_exp1_CpG.RData")
 
 # 7. Get Data from results ----
 act_diff_CpG_data = getData(act_diff_CpG)
@@ -159,6 +173,10 @@ save(act_diff_CpG_gr, file = "act_diff_CpG_gr_exp1.RData")
 
 # 9. Load in the annotated genome file
 methylation_matching <- read.table("../../Data/methylation_matching_file.tsv", header = FALSE, sep = "\t", col.names = c("chr", "utg_name"))
+  # Trying with name changes to chr data
+      # Wont work because the data from the methylation analyses and data prep used the WHPX naming conventions
+#methylation_matching <- read.table("../../Data/methylation_matching_file_names.tsv", header = FALSE, sep = "\t", col.names = c("chr", "utg_name"))
+
 
 # 10. Rename columns for clarity
 colnames(act_diff_CpG_data)[1] <- "chr"
@@ -185,7 +203,7 @@ act_diff_CpG_data_matched <- merged_data %>%
 act_diff_CpG_gr <- as(act_diff_CpG_data_matched, "GRanges")
 
 # 16. load in annotated genome
-genome <- read_gff3("../../Data/A_Equina_with_promoters.gff3")
+genome <- read_gff3("../../Data2/A_Equina_with_promoters.gff3")
 # 17. Change to dataframe object
 genome <- as.data.frame(genome)
 # replace NA data with "NA"
@@ -283,65 +301,16 @@ write.table(act_diff_CpG_df_ann, "Exp1 DMBs in CpG context_new_code.txt", sep="\
 
 data <- act_diff_CpG_df_ann
 
-data$diffmeth <- 'NO'
-data$diffmeth[data$meth.diff >= (5) & data$p_fdr < 0.1] <- 'UP'
-data$diffmeth[data$meth.diff <= (-5) & data$p_fdr < 0.1] <- 'DOWN'
-data$diffmeth <- as.factor(data$diffmeth)
-
-volcano_plot <- ggplot(data = data,
-       aes(x = meth.diff, y = -log10(p_fdr), col = diffmeth)) + 
-  geom_point() + 
-  geom_vline(xintercept = c(-2), col = "blue", linetype = "dashed") +
-  geom_vline(xintercept = c(2), col = "red", linetype = "dashed") +
-  geom_hline(yintercept = c(1), col = "black", linetype = "dashed") + 
-  theme_classic() +
-  theme(
-    axis.title.y = element_text(face = "bold", margin = margin(0,20,0,0), size = rel(1.1), color = "black"),
-    axis.title.x = element_text(hjust = 0.5, face = "bold", margin = margin(20,0,0,0), size = rel(1.1), color = "black"),
-    plot.title = element_text(hjust = 0.5)
-  ) + 
-  scale_color_manual(values = c("deepskyblue","gray", "brown1"),
-                     labels = c("Down Methylated", "Not Significant", "Up Methylated")) + 
-  labs(
-    x = "Differential methyltion %", y = expression("-log"[10]*"p-adj")
-  ) + 
-  ggtitle("Differential Methylation of CpGs of Experiment 1")
-
-ggsave("volcano_plot_exp1_cpg_new_code.png", volcano_plot, width = 18, height = 12, units = "cm")
-
-
-# Essential code only for changing the threshold:
-# Select which threshold Dataset to use:
-act_diff_CpG = act_diff_CpG_10
-
-act_diff_CpG_data = getData(act_diff_CpG)
-act_diff_CpG_gr =  as(act_diff_CpG_data,"GRanges")
-colnames(act_diff_CpG_data)[1] <- "chr"
-merged_data <- merge(act_diff_CpG_data, methylation_matching, by = "chr", all.x = TRUE)
-act_diff_CpG_data_matched <- left_join(act_diff_CpG_data, methylation_matching, by = "chr")
-act_diff_CpG_data_matched <- merged_data %>%
-  rename(chr = utg_name, WHPX_names = chr) %>%
-  select(chr, everything(), WHPX_names)
-
-act_diff_CpG_gr <- as(act_diff_CpG_data_matched, "GRanges")
-act_diff_CpG_gr_ann = join_overlap_left_directed(act_diff_CpG_gr, annotated_genome_gr)
-act_diff_CpG_df_ann = as(act_diff_CpG_gr_ann, "data.frame")
-act_diff_CpG_df_ann$p_fdr = p.adjust(act_diff_CpG_df_ann$pvalue, method = "fdr")
-act_diff_CpG_df_ann$Parent <- as.character(act_diff_CpG_df_ann$Parent)
-write.table(act_diff_CpG_df_ann, "Exp1 DMBs in CpG context.txt", sep="\t", row.names=FALSE)
-
-data <- act_diff_CpG_df_ann
-
-data$diffmeth <- 'NO'
-data$diffmeth[data$meth.diff >= (1) & data$p_fdr < 0.1] <- 'UP'
-data$diffmeth[data$meth.diff <= (-1) & data$p_fdr < 0.1] <- 'DOWN'
+data$diffmeth <- ''
+data$diffmeth[data$meth.diff >= (0)] <- 'UP'
+data$diffmeth[data$meth.diff <= (0)] <- 'DOWN'
 data$diffmeth <- as.factor(data$diffmeth)
 
 volcano_plot <- ggplot(data = data,
        aes(x = meth.diff, y = -log10(p_fdr), col = diffmeth)) +
   geom_point() +
-  geom_vline(xintercept = c(-10), col = "blue", linetype = "dashed") +
-  geom_vline(xintercept = c(10), col = "red", linetype = "dashed") +
+  geom_vline(xintercept = c(-5), col = "blue", linetype = "dashed") +
+  geom_vline(xintercept = c(5), col = "red", linetype = "dashed") +
   geom_hline(yintercept = c(1), col = "black", linetype = "dashed") +
   theme_classic() +
   theme(
@@ -349,14 +318,142 @@ volcano_plot <- ggplot(data = data,
     axis.title.x = element_text(hjust = 0.5, face = "bold", margin = margin(20,0,0,0), size = rel(1.1), color = "black"),
     plot.title = element_text(hjust = 0.5)
   ) +
-  scale_color_manual(values = c("deepskyblue","gray", "brown1"),
-                     labels = c("Down Methylated", "Not Significant", "Up Methylated")) +
+  scale_color_manual(values = c("deepskyblue", "brown1"),
+                     labels = c("Down Methylated", "Up Methylated")) +
   labs(
     x = "Differential methyltion %", y = expression("-log"[10]*"p-adj")
   ) +
   ggtitle("Differential Methylation of CpGs of Experiment 1")
 
-ggsave("volcano_plot_exp1_cpg.png", volcano_plot, width = 18, height = 12, units = "cm")
+ggsave("volcano_plot_exp1_CpG.png", volcano_plot, width = 18, height = 12, units = "cm")
+
+## Region Counts section [new] ----
+
+# Need to create this directory before using script
+setwd("/uoa/home/r02hw22/sharedscratch/Methylation_Analyses/Methylation_Analyses_Anemones/results")
+
+# Load in required packages
+library(methylKit) # for methylation analyses
+library(plyranges) # ...
+library(GenomicRanges) # for converting anf using files as GRanges
+library(qqman) # ...
+library(dplyr) # provides access to functions to manipulate data
+library(ggplot2) # for plotting purposes
+library(data.table) # for df manipulation
+
+# load in data from data/2
+file.list = list("../../Data2/Trimmed/Sample_3-3_D/meth_CpG_cov_reads",
+		"../../Data2/Trimmed/Sample_9-9_D/meth_CpG_cov_reads",
+		"../../Data2/Trimmed/Sample_13-13_D/meth_CpG_cov_reads",
+		"../../Data2/Trimmed/Sample_15-15_D/meth_CpG_cov_reads",
+		"../../Data2/Trimmed/Sample_16-16_D/meth_CpG_cov_reads",
+		"../../Data2/Trimmed/Sample_17-17_D/meth_CpG_cov_reads",
+		"../../Data2/Trimmed/Sample_22-22_D/meth_CpG_cov_reads",
+		"../../Data2/Trimmed/Sample_27-27_D/meth_CpG_cov_reads")
+
+		act_CpG = methRead(file.list,
+                   sample.id = list("3","9","13","15","16","17","22","27"),
+                   assembly="actinia",
+                   pipeline = "bismarkCoverage",
+                   treatment = c(1,0,0,1,0,0,1,1),
+                   context = "CpG",
+                   dbtype="tabix")
+
+#Load a methyl data base for each nest at each time point
+CpG_meth_db_3 = readMethylDB("methylDB_2024-10-21_SqP/3.txt.bgz")
+CpG_meth_db_9 = readMethylDB("methylDB_2024-10-21_SqP/9.txt.bgz")
+CpG_meth_db_13 = readMethylDB("methylDB_2024-10-21_SqP/13.txt.bgz")
+CpG_meth_db_15 = readMethylDB("methylDB_2024-10-21_SqP/15.txt.bgz")
+CpG_meth_db_16 = readMethylDB("methylDB_2024-10-21_SqP/16.txt.bgz")
+CpG_meth_db_17 = readMethylDB("methylDB_2024-10-21_SqP/17.txt.bgz")
+CpG_meth_db_22 = readMethylDB("methylDB_2024-10-21_SqP/22.txt.bgz")
+CpG_meth_db_27 = readMethylDB("methylDB_2024-10-21_SqP/27.txt.bgz")
+
+# new from data2
+CpG_meth_db_3 = readMethylDB("methylDB_2024-10-22_b3y/3.txt.bgz")
+CpG_meth_db_9 = readMethylDB("methylDB_2024-10-22_b3y/9.txt.bgz")
+CpG_meth_db_13 = readMethylDB("methylDB_2024-10-22_b3y/13.txt.bgz")
+CpG_meth_db_15 = readMethylDB("methylDB_2024-10-22_b3y/15.txt.bgz")
+CpG_meth_db_16 = readMethylDB("methylDB_2024-10-22_b3y/16.txt.bgz")
+CpG_meth_db_17 = readMethylDB("methylDB_2024-10-22_b3y/17.txt.bgz")
+CpG_meth_db_22 = readMethylDB("methylDB_2024-10-22_b3y/22.txt.bgz")
+CpG_meth_db_27 = readMethylDB("methylDB_2024-10-22_b3y/27.txt.bgz")
+
+CpG_meth_db_example = readMethylDB("3_aggregated_methylation_counts.txt.bgz")
+
+# Bundle these into a single database,
+# methylRawListDB
+act_CpG_raw_DB = methylRawListDB(c(CpG_meth_db_3,
+                                   CpG_meth_db_9,
+                                   CpG_meth_db_13,
+                                   CpG_meth_db_15,
+                                   CpG_meth_db_16,
+                                   CpG_meth_db_17,
+                                   CpG_meth_db_22,
+                                   CpG_meth_db_27),
+                   treatment = c(1,0,0,1,0,0,1,1))
+
+head(act_CpG_raw_DB)
+
+act_CpG_list_DB <-                 list(CpG_meth_db_3,
+                                   CpG_meth_db_9,
+                                   CpG_meth_db_13,
+                                   CpG_meth_db_15,
+                                   CpG_meth_db_16,
+                                   CpG_meth_db_17,
+                                   CpG_meth_db_22,
+                                   CpG_meth_db_27)
+
+do_region_counts = function(dblist){
+  tryCatch({ regionCounts( dblist, genome)
+  }, error=function(e){cat("ERROR :",conditionMessage(e), "\n")})
+}
+
+
+# load in annotated genome
+genome <- read_gff3("../../Data/A_Equina_with_promoters.gff3")
+# Change to dataframe object
+genome <- as.data.frame(genome)
+# replace NA data with "NA"
+genome[] <- lapply(genome, function(x) {
+    # Check if the column is a factor and handle it accordingly
+    if(is.factor(x)) {
+        # Convert factor to character to avoid levels issues
+        x <- as.character(x)
+    }
+    # Replace NA with "NA" (as character string)
+    x[is.na(x)] <- "NA"
+    return(x)
+})
+# convert back to GRanges format
+# annotated_genome_gr <- as(genome, "GRanges")
+genome <- as(genome, "GRanges")
+
+genome_genes = genome %>% filter(type == "gene")
+
+# Use "regionCounts" to summarise methylation data by each gene
+cpg_counts_gene_exp1 = regionCounts(act_CpG_raw_DB, genome, cov.bases = 0)
+cpg_counts_gene_exp1 = regionCounts(act_CpG_raw_DB, genome_genes)
+
+act_CpG_regions_exp1 = lapply(act_CpG_list_DB, do_region_counts)
+
+# Convert methylation data to GRanges (if not already)
+methyl_gr <- as(act_CpG_raw_DB[[1]], "GRanges")
+
+# Find overlaps
+overlaps <- findOverlaps(
+  query = genome,
+  subject = methyl_gr,
+  ignore.strand = TRUE
+)
+
+# Check the number of overlaps
+num_overlaps <- length(overlaps)
+print(paste("Number of overlaps:", num_overlaps))
+
+if (num_overlaps == 0) {
+  message("No overlaps found between methylation data and regions.")
+}
 
 
 	  #  ---------- CHG ------------ #
