@@ -49,7 +49,6 @@ po/*~
 rsconnect/
 
 # Ignore Large files
-/path/to/your/data/
 *.bam
 *.fastq
 *.fastq.gz
@@ -57,3 +56,9 @@ rsconnect/
 *.gz
 *_pe.deduplicated.txt
 *_cov_reads
+*.xlsx
+*.gff3
+*.txt
+*.tsv
+
+# Ignore specific directories with large data files
